@@ -29,6 +29,9 @@ function combine(statsObjects) {
     L.each(stats._latencies, function(latency) {
       result._latencies.push(latency);
     });
+    L.each(stats._timingData, function(timingDatum) {
+      result._timingData.push(timingDatum);
+    });
     result._generatedScenarios += stats._generatedScenarios;
     L.each(stats._scenarioCounter, function(count, name) {
       if(result._scenarioCounter[name]) {
@@ -150,6 +153,11 @@ Stats.prototype.addLatency = function(delta) {
   return this;
 };
 
+Stats.prototype.addTimingDatum = function(timingDatum) {
+  this._timingData.push(timingDatum);
+  return this;
+}
+
 Stats.prototype.addScenarioLatency = function(delta) {
   this._scenarioLatencies.push(delta);
   return this;
@@ -182,6 +190,9 @@ Stats.prototype.report = function() {
     p99: round(sl.percentile(latencies, 0.99) / 1e6, 1)
   };
 
+  let timingData = this._timingData;
+  console.log("timingData = "+timingData);
+
   let startedAt = L.min(this._requestTimestamps);
   let now = Date.now();
   let count = L.size(this._requestTimestamps);
@@ -208,6 +219,8 @@ Stats.prototype.report = function() {
   result.matches = this._matches;
 
   result.latencies = latencies;
+
+  result.timingData = timingData;
 
   result.customStats = {};
   L.each(this._customStats, function(ns, name) {
@@ -250,6 +263,7 @@ Stats.prototype.counter = function(name, value) {
 Stats.prototype.reset = function() {
   this._entries = [];
   this._latencies = [];
+  this._timingData = [];
   this._generatedScenarios = 0;
   this._completedScenarios = 0;
   this._codes = {};

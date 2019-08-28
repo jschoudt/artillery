@@ -9,6 +9,7 @@ const _ = require('lodash');
 const request = require('request');
 const debug = require('debug')('http');
 const debugRequests = require('debug')('http:request');
+const debugRequestTiming = require('debug')('http:request_timing');
 const debugResponse = require('debug')('http:response');
 const debugFullBody = require('debug')('http:full_body');
 const USER_AGENT = 'Artillery (https://artillery.io)';
@@ -209,7 +210,8 @@ HttpEngine.prototype.step = function step(requestSpec, ee, opts) {
       headers: {
       },
       timeout: timeout * 1000,
-      jar: context._jar
+      jar: context._jar,
+      time: true
     });
     requestParams = _.extend(requestParams, tls);
 
@@ -474,7 +476,8 @@ HttpEngine.prototype.step = function step(requestSpec, ee, opts) {
               const endedAt = process.hrtime(startedAt);
               let delta = (endedAt[0] * 1e9) + endedAt[1];
               debugRequests('request end: %s', req.path);
-              ee.emit('response', delta, code, context._uid);
+              debugRequestTiming('request timings: %s', JSON.stringify({timings: res.request.timings, timingPhases: res.request.timingPhases}));
+              ee.emit('response', delta, code, context._uid, {timings: res.request.timings, timingPhases: res.request.timingPhases});
             });
           }).on('end', function() {
             context._successCount++;

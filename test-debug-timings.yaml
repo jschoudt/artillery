@@ -1,0 +1,19 @@
+config:
+  target: "https://origin-gateway-s.watsonplatform.net"
+  phases:
+    - duration: 10
+      arrivalRate: 5
+  defaults:
+    headers:
+      x-global-transaction-id : "jts-timings-test-1"
+  plugins:
+    statsd:
+    - host: "localhost"
+      port: 8125
+      prefix: "artillery"
+
+
+scenarios:
+  - flow:
+    - get:
+        url: "/"
